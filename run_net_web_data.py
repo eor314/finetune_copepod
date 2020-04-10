@@ -42,6 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--time_step', metavar='time_step', default='week',
                         choices=['hour', 'day', 'week'], help='amount of time to increment')
     parser.add_argument('--num_step', metavar='num_step', default=10, help='number of time steps to take')
+    parser.add_argument('--start_time', metavar='start_time', default=1502092800000, help='start time as unix timestamp in milliseconds')
     parser.add_argument('--server', metavar='server', default='planktivore',
                         choices=['planktivore', 'spc'], help='which server to retrieve images from')
     parser.add_argument('--save_mosaic', type=str2bool, default=False, help='name of image subdir within data_dir')
@@ -56,6 +57,7 @@ if __name__ == '__main__':
     cam = args.camera
     serv = args.server
     tstep = args.time_step
+    stime = int(args.start_time)
     nstep = int(args.num_step)
     save_mosaic = args.save_mosaic
     num_per_class = args.num_per_class
@@ -69,16 +71,19 @@ if __name__ == '__main__':
     # get the increment in numbers
     inc_dict = {'hour': None, 'day': 1, 'week': 7}
     inc = inc_dict[tstep]
+    
+    # set the end time for first URL based on increment
+    etime = stime + (inc*24*60*60-1)*1000
 
     # derive the validation directory from the classifier file path
     val_dir = os.path.join(os.path.split(saved_model)[0], 'val')
 
-    # set the server information (these are set up to increment Mondays, hard coded sizes for copeopds (1 mm to 5 mm)
+    # set the server information (these are set up to increment Mondays, hard coded sizes for phytos (.03 mm to 1 mm)
     if serv == 'planktivore':
-        testset01_url = f"http://planktivore.ucsd.edu/data/rois/images/{cam}/1502092800000/1502179199000/0/24/500/135/678/0.3/1/clipped/ordered/skip/Any/anytype/Any/Any/"
+        testset01_url = f"http://planktivore.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/40/1356/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
         im_loc = 'http://planktivore.ucsd.edu'
     else:
-        testset01_url = f"http://spc.ucsd.edu/data/rois/images/{cam}/1426492800000/1426579199000/0/24/500/135/678/0.3/1/clipped/ordered/skip/Any/anytype/Any/Any/"
+        testset01_url = f"http://spc.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/40/1356/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
         im_loc = 'http://spc.ucsd.edu'
 
     class_names = []
