@@ -45,6 +45,8 @@ if __name__ == '__main__':
     parser.add_argument('--start_time', metavar='start_time', default=1502092800000, help='start time as unix timestamp in milliseconds')
     parser.add_argument('--server', metavar='server', default='planktivore',
                         choices=['planktivore', 'spc'], help='which server to retrieve images from')
+    parser.add_argument('--min_length', metavar='min_length', default=40, help='minimum length to query in pixels [default for SPCP]')
+    parser.add_argument('--max_length', metavar='max_length', default=1356, help='minimum length to query in pixels [default for SPCP]')
     parser.add_argument('--save_mosaic', type=str2bool, default=False, help='name of image subdir within data_dir')
     parser.add_argument('--num_per_class', default=20, help='number to select for mosaic')
     parser.add_argument('--output_fold', metavar='output_fold', default=None, help='existing output folder')
@@ -59,6 +61,8 @@ if __name__ == '__main__':
     tstep = args.time_step
     stime = int(args.start_time)
     nstep = int(args.num_step)
+    mn_len = int(args.min_length)
+    mx_len = int(args.max_length)
     save_mosaic = args.save_mosaic
     num_per_class = args.num_per_class
     buff = int(args.buff)
@@ -80,10 +84,10 @@ if __name__ == '__main__':
 
     # set the server information (these are set up to increment Mondays, hard coded sizes for phytos (.03 mm to 1 mm)
     if serv == 'planktivore':
-        testset01_url = f"http://planktivore.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/40/1356/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
+        testset01_url = f"http://planktivore.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/{mn_len}/{mx_len}/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
         im_loc = 'http://planktivore.ucsd.edu'
     else:
-        testset01_url = f"http://spc.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/40/1356/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
+        testset01_url = f"http://spc.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/{mn_len}/{mx_len}/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
         im_loc = 'http://spc.ucsd.edu'
 
     class_names = []
