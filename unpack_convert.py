@@ -61,7 +61,8 @@ if __name__ == '__main__':
             tar.close()
 
     # convert the images from tif
-    out_ptf = os.path.join(os.path.split(out_dir)[0], 'cvt_imgs')
+    #out_ptf = os.path.join(os.path.split(out_dir)[0], 'cvt_imgs')
+    out_ptf = os.path.join(out_dir, 'cvt_imgs')
     img_dirs = glob.glob(os.path.join(out_dir, '*'))
 
     if not os.path.exists(out_ptf):

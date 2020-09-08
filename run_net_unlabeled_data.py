@@ -79,11 +79,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     data_dir = args.data_dir
     classifier = args.classifier
+    classifier = classifier.strip('\u202a')
     save_mosaic = args.save_mosaic
     num_per_class = int(args.num_per_class)
     buff = int(args.buff)
 
-    print(num_per_class)
+    #print(num_per_class)
 
     # derive the output validation directory from the classifier name
     data_parent = os.path.split(classifier)[0]
@@ -92,7 +93,8 @@ if __name__ == '__main__':
 
     val_dir = os.path.join(data_parent, 'val')
     print(output_parent)
-    os.mkdir(output_parent)
+    if not os.path.exists(output_parent):
+        os.mkdir(output_parent)
 
     class_names = []
     for name in sorted(glob.glob(os.path.join(val_dir, '*'))):
@@ -154,7 +156,12 @@ if __name__ == '__main__':
 
     ### iterate over directories ###
     dirs_to_process = glob.glob(os.path.join(data_dir, '*'))
+    dirs_to_process = [item for item in dirs_to_process if os.path.isdir(item)]
     dirs_to_process.sort()
+
+    # if dirs_to_process is empty, assume all the images live in the given data_dir
+    if len(dirs_to_process) == 0:
+        dirs_to_process.append(data_dir)
 
     # make the temp directory for symlinking
     temp_parent = os.path.join(output_parent, 'temp')
