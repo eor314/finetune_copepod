@@ -59,7 +59,8 @@ if __name__=="__main__":
     parser.add_argument('--min_images', default=100, help='Smallest number of images per class to use')
     parser.add_argument('--duplicate', type=str2bool, default=True, help='When True, images are duplicated as needed')
     parser.add_argument('--test_ims', type=str2bool, default=False, help='when True, open each image to ensure no error')
-
+    parser.add_argument('--symlink', type=str2bool, default=True, help='When True, symlink images instead of copying to new dir')
+    
     args = parser.parse_args()
 
     data_path = args.data_dir
@@ -73,7 +74,7 @@ if __name__=="__main__":
     min_imgs = int(args.min_images)
     duplicate = args.duplicate
     test_ims = args.test_ims
-
+    symflag = args.symlink
     img_path = os.path.join(data_path, img_subdir)
 
     list_image_counts(img_path)
@@ -143,7 +144,10 @@ if __name__=="__main__":
                 #im_temp.save(img_dest)
 
             if not test_ims:
-                shutil.copy(imgs[ind], img_dest)
+                if symflag:
+                    os.symlink(imgs[ind], img_dest)
+                else:
+                    shutil.copy(imgs[ind], img_dest)
 
             else:
                 flg = test_img(imgs[ind])
@@ -169,7 +173,10 @@ if __name__=="__main__":
                 #im_temp.save(img_dest)
 
             if not test_ims:
-                shutil.copy(imgs[ind], img_dest)
+                if symflag:
+                    os.symlink(imgs[ind], img_dest)
+                else:
+                    shutil.copy(imgs[ind], img_dest)
 
             else:
                 flg = test_img(imgs[ind])

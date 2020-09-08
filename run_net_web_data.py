@@ -46,7 +46,9 @@ if __name__ == '__main__':
     parser.add_argument('--server', metavar='server', default='planktivore',
                         choices=['planktivore', 'spc'], help='which server to retrieve images from')
     parser.add_argument('--min_length', metavar='min_length', default=40, help='minimum length to query in pixels [default for SPCP]')
-    parser.add_argument('--max_length', metavar='max_length', default=1356, help='minimum length to query in pixels [default for SPCP]')
+    parser.add_argument('--max_length', metavar='max_length', default=1356, help='maximum length to query in pixels [default for SPCP]')
+    parser.add_argument('--min_aspect', metavar='min_aspect', default=0.3, help='minimum min_ax:max_ax aspect to query as a unitless ratio [default=0.3]')
+    parser.add_argument('--max_aspect', metavar='max_aspect', default=1, help='maximum min_ax:max_ax aspect to query as a unitless ratio [default=1]')
     parser.add_argument('--save_mosaic', type=str2bool, default=False, help='name of image subdir within data_dir')
     parser.add_argument('--num_per_class', default=20, help='number to select for mosaic')
     parser.add_argument('--output_fold', metavar='output_fold', default=None, help='existing output folder')
@@ -63,6 +65,8 @@ if __name__ == '__main__':
     nstep = int(args.num_step)
     mn_len = int(args.min_length)
     mx_len = int(args.max_length)
+    mn_asp = float(args.min_aspect)
+    mx_asp = float(args.max_aspect)
     save_mosaic = args.save_mosaic
     num_per_class = args.num_per_class
     buff = int(args.buff)
@@ -77,17 +81,18 @@ if __name__ == '__main__':
     inc = inc_dict[tstep]
     
     # set the end time for first URL based on increment
-    etime = stime + (inc*24*60*60-1)*1000
+    etime = stime + (24*60*60*1000*inc) - 1000  # subtract 1000 to get make 1 second before the hour
 
     # derive the validation directory from the classifier file path
     val_dir = os.path.join(os.path.split(saved_model)[0], 'val')
 
     # set the server information (these are set up to increment Mondays, hard coded sizes for phytos (.03 mm to 1 mm)
+    # cannot use f strings in python 2 so changed to .format [ECO 4/23/20]
     if serv == 'planktivore':
-        testset01_url = f"http://planktivore.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/{mn_len}/{mx_len}/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
+        testset01_url = "http://planktivore.ucsd.edu/data/rois/images/{}/{}/{}/0/24/500/{}/{}/{}/{}/clipped/ordered/skip/Any/anytype/Any/Any/".format(cam, stime, etime, mn_len, mx_len, mn_asp, mx_asp)
         im_loc = 'http://planktivore.ucsd.edu'
     else:
-        testset01_url = f"http://spc.ucsd.edu/data/rois/images/{cam}/{stime}/{etime}/0/24/500/{mn_len}/{mx_len}/0.05/1/clipped/ordered/skip/Any/anytype/Any/Any/"
+        testset01_url = "http://spc.ucsd.edu/data/rois/images/{}/{}/{}/0/24/500/{}/{}/{}/{}/clipped/ordered/skip/Any/anytype/Any/Any/".format(cam, stime, etime, mn_len, mx_len, mn_asp, mx_asp)
         im_loc = 'http://spc.ucsd.edu'
 
     class_names = []
