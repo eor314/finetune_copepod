@@ -95,7 +95,6 @@ if __name__=="__main__":
 
         if train_pct != 0:
 
-            # make inds
             all_inds = random.sample(range(0,len(imgs)),len(imgs))
             train_inds = all_inds[0:int(train_pct*len(imgs))]
             val_inds = all_inds[int(train_pct*len(imgs)):]

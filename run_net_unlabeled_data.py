@@ -69,12 +69,15 @@ if __name__ == '__main__':
     # define parser
     parser = argparse.ArgumentParser(description='Make a train and val set from labels')
 
-    parser.add_argument('data_dir', metavar='data_dir', help='path to unlabeled data')
+    parser.add_argument('data_dir', metavar='data_dir', help='Path to unlabeled data. If directory, loops over images '
+                                                             'or subdirectory. If text file, reads absolute paths for '
+                                                             'images')
     parser.add_argument('classifier', metavar='classifier', help='path to trained weights')
     parser.add_argument('--save_mosaic', metavar='save_mosaic', type=str2bool,
                         default=False, help='name of image subdir within data_dir')
     parser.add_argument('--num_per_class', metavar='num_per_class', default=20, help='number to select for mosaic')
-    parser.add_argument('--buff', metavar='buff', default=0, help='number of pixels to add as buffer between classes in mosaic')
+    parser.add_argument('--buff', metavar='buff', default=0, help='number of pixels to add as buffer between classes'
+                                                                  ' in mosaic')
 
     args = parser.parse_args()
     data_dir = args.data_dir
@@ -171,7 +174,13 @@ if __name__ == '__main__':
 
     for dir_in in dirs_to_process:
 
-        imgs_in = glob.glob(os.path.join(dir_in, '*'))
+        if os.path.isdir(dir_in):
+            imgs_in = glob.glob(os.path.join(dir_in, '*'))
+        else:
+            with open(dir_in, 'r') as ff:
+                imgs_in = list(ff)
+                imgs_in = [line.strip() for line in imgs_in]
+                ff.close()
 
         temp_out = {k: [] for k in class_names}
 
