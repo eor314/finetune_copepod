@@ -6,7 +6,7 @@ import shutil
 import numpy as np
 import argparse
 from PIL import Image
-
+from datetime import datetime
 
 def str2bool(v):
     """
@@ -64,7 +64,7 @@ if __name__=="__main__":
     args = parser.parse_args()
 
     data_path = args.data_dir
-    dataset_path = args.output_dir
+    out_dir = args.output_dir
     img_subdir = args.image_subdir
     train_name = args.train_name
     val_name = args.val_name
@@ -79,6 +79,13 @@ if __name__=="__main__":
     img_path = os.path.join(data_path, img_subdir)
 
     list_image_counts(img_path)
+    print(os.path.basename(data_path))
+    dataset_parent = os.path.join(out_dir, os.path.basename(data_path))
+    #print(dataset_parent)
+    dataset_path = os.path.join(dataset_parent, datetime.utcnow().isoformat()[:-7].replace(':','-'))
+
+    if not os.path.exists(dataset_parent):
+        os.mkdir(dataset_parent)
 
     if not os.path.exists(dataset_path):
         os.makedirs(dataset_path)
