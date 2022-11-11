@@ -79,6 +79,11 @@ if __name__ == '__main__':
     parser.add_argument('--num_per_class', metavar='num_per_class', default=20, help='number to select for mosaic')
     parser.add_argument('--buff', metavar='buff', default=0, help='number of pixels to add as buffer between classes'
                                                                   ' in mosaic')
+    parser.add_argument(
+        '--save_all_out', 
+        action='store_true', 
+        help='whether to copy images to output directory'
+    )
 
     args = parser.parse_args()
     data_dir = args.data_dir
@@ -87,6 +92,10 @@ if __name__ == '__main__':
     save_mosaic = args.save_mosaic
     num_per_class = int(args.num_per_class)
     buff = int(args.buff)
+    save_all_out = args.save_all_out
+
+    if save_all_out:
+        print('Saving all output images')
 
     #print(num_per_class)
 
@@ -241,6 +250,19 @@ if __name__ == '__main__':
                     for line in temp_out[kk]:
                         ff.write(line + '\n')
                     ff.close()
+
+            # save copies of the images to output directory
+            if save_all_out:
+                for kk in temp_out.keys():
+
+                    dir_name = os.path.join(out_subdir, kk)
+
+                    if not os.path.exists(dir_name):
+                        os.makedirs(dir_name)
+
+                    for line in temp_out[kk]:
+                        # copy image to dir
+                        copy(os.path.join(data_dir, line), dir_name)
 
             # make the mosaics if needed
             if save_mosaic:
