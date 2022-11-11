@@ -165,7 +165,7 @@ if __name__=="__main__":
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model_type = 'resnet18'
+    model_type = args.model
 
     if model_type == 'resnet34':
         model_conv = models.resnet34(pretrained=True)
