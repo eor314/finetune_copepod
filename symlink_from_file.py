@@ -12,7 +12,7 @@ def symlink_from_file(inpath, outpath, fmt):
 
 if __name__=="__main__":
 
-    parser = argparse.ArgumentParser(description='Finetune a convnet')
+    parser = argparse.ArgumentParser(description='Command line tool to symlink a list of images to a directory')
     parser.add_argument('ptf', metavar='ptf', help='path to images to symlink')
     parser.add_argument('outptf', metavar='outptf', help='where to make symlink')
     parser.add_argument('--format', default='jpeg', metavar='format', choices=['jpg', 'jpeg', 'png', 'tiff'],
