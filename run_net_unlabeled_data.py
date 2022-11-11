@@ -73,6 +73,7 @@ if __name__ == '__main__':
                                                              'or subdirectory. If text file, reads absolute paths for '
                                                              'images')
     parser.add_argument('classifier', metavar='classifier', help='path to trained weights')
+    parser.add_argument('--output_parent', metavar='output_parent', help='absolute path to directory to save outputs')
     parser.add_argument('--save_mosaic', metavar='save_mosaic', type=str2bool,
                         default=False, help='name of image subdir within data_dir')
     parser.add_argument('--num_per_class', metavar='num_per_class', default=20, help='number to select for mosaic')
@@ -91,11 +92,18 @@ if __name__ == '__main__':
 
     # derive the output validation directory from the classifier name
     data_parent = os.path.split(classifier)[0]
-    output_parent = os.path.join(data_parent, 'outputs', os.path.basename(classifier).split('.')[0] +
+
+    if args.output_parent:
+        # if directory specified
+        output_parent = os.path.join(args.output_parent, os.path.basename(classifier).split('.')[0] +
+                                 '_' + str(int(time.time())))
+    else:
+        # dervice from classifier directory
+        output_parent = os.path.join(data_parent, 'outputs', os.path.basename(classifier).split('.')[0] +
                                  '_' + str(int(time.time())))
 
     val_dir = os.path.join(data_parent, 'val')
-    print(output_parent)
+
     if not os.path.exists(output_parent):
         os.mkdir(output_parent)
 
@@ -159,7 +167,7 @@ if __name__ == '__main__':
 
     ### iterate over directories ###
     dirs_to_process = glob.glob(os.path.join(data_dir, '*'))
-    dirs_to_process = [item for item in dirs_to_process if os.path.isdir(item)]
+    dirs_to_process = [item for item in dirs_to_process if os.path.isdir(item) if 'outputs' not in item]  # check that outputs in not in there
     dirs_to_process.sort()
 
     # if dirs_to_process is empty, assume all the images live in the given data_dir
