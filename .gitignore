@@ -6,6 +6,7 @@ datasets/
 # Caches
 *__pycache__/
 .pytest_cache/
+*.pyc
 
 # Build
 build/
