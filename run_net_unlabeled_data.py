@@ -49,36 +49,44 @@ class ImageFolderWithPaths(datasets.ImageFolder):
         return tuple_with_path
 
 
-def str2bool(v):
-    """
-    returns a boolean from argparse input
-    """
-
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected')
-
-
 if __name__ == '__main__':
 
     # define parser
     parser = argparse.ArgumentParser(description='Make a train and val set from labels')
 
-    parser.add_argument('data_dir', metavar='data_dir', help='Path to unlabeled data. If directory, loops over images '
-                                                             'or subdirectory. If text file, reads absolute paths for '
-                                                             'images')
-    parser.add_argument('classifier', metavar='classifier', help='path to trained weights')
-    parser.add_argument('--output_parent', metavar='output_parent', help='absolute path to directory to save outputs')
-    parser.add_argument('--save_mosaic', metavar='save_mosaic', type=str2bool,
-                        default=False, help='name of image subdir within data_dir')
-    parser.add_argument('--num_per_class', metavar='num_per_class', default=20, help='number to select for mosaic')
-    parser.add_argument('--buff', metavar='buff', default=0, help='number of pixels to add as buffer between classes'
-                                                                  ' in mosaic')
+    parser.add_argument(
+        'data_dir', 
+        metavar='data_dir', 
+        help='Path to unlabeled data. If directory, loops over images or subdirectory.' 
+                'If text file, reads absolute paths for images'
+    )
+    parser.add_argument(
+        'classifier', 
+        metavar='classifier', 
+        help='path to trained weights'
+    )
+    parser.add_argument(
+        '--output_parent', 
+        metavar='output_parent', 
+        help='absolute path to directory to save outputs'
+    )
+    parser.add_argument(
+        '--save_mosaic', 
+        action='store_true', 
+        help='name of image subdir within data_dir'
+    )
+    parser.add_argument(
+        '--num_per_class', 
+        metavar='num_per_class', 
+        default=20, 
+        help='number to select for mosaic'
+    )
+    parser.add_argument(
+        '--buff', 
+        metavar='buff', 
+        default=0, 
+        help='number of pixels to add as buffer between classes in mosaic'
+    )
     parser.add_argument(
         '--save_all_out', 
         action='store_true', 
