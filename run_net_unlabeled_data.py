@@ -269,8 +269,16 @@ if __name__ == '__main__':
                         os.makedirs(dir_name)
 
                     for line in temp_out[kk]:
-                        # copy image to dir
-                        copy(os.path.join(data_dir, line), dir_name)
+
+                        try:
+                            # find the absolute path of the original image
+                            abs_img = [item for item in imgs_in if os.path.basename(item) == line][0]
+
+                            # copy image to dir
+                            copy(abs_img, dir_name)
+                        except FileNotFoundError:
+                            print('Can not find: ', abs_img)
+                            continue
 
             # make the mosaics if needed
             if save_mosaic:
