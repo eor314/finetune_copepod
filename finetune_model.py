@@ -118,12 +118,13 @@ def train_model(model, criterion, optimizer, scheduler,
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser(description='Finetune a convnet')
-
     parser.add_argument('data_dir',metavar='data_dir',help='path to train and val data')
-
-    parser.add_argument('--model',default='resnet34',choices=['resnet18','resnet34','squeezenet'],
-        help='The type of model to finetune')
-
+    parser.add_argument(
+        '--model',
+        default='resnet18',
+        choices=['resnet18','resnet34','squeezenet'],
+        help='The type of model to finetune'
+    )
     parser.add_argument('--epochs',default=24,type=int,help='The number of training epochs')
 
     args = parser.parse_args()
