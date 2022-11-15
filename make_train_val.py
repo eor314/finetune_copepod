@@ -114,21 +114,11 @@ if __name__=="__main__":
                 img_dest = os.path.join(new_img_dir,
                                         os.path.basename(imgs[ind])[:-4] + '_index_' +
                                         str(i).zfill(4) + os.path.splitext(imgs[ind])[1])
-                #im_temp = Image.open(imgs[ind])
-                #im_temp.save(img_dest)
 
-            if not test_ims:
-                if symflag:
-                    os.symlink(imgs[ind], img_dest)
-                else:
-                    shutil.copy(imgs[ind], img_dest)
-
+            if symflag:
+                os.symlink(imgs[ind], img_dest)
             else:
-                flg = test_img(imgs[ind])
-                if flg:
-                    shutil.copy(imgs[ind], img_dest)
-                else:
-                    pass
+                shutil.copy(imgs[ind], img_dest)
 
         new_img_dir = os.path.join(dataset_path, 'val', os.path.basename(img_dir))
 
@@ -143,18 +133,8 @@ if __name__=="__main__":
                 img_dest = os.path.join(new_img_dir,
                                         os.path.basename(imgs[ind])[:-4] + '_index_' +
                                         str(i).zfill(4) + os.path.splitext(imgs[ind])[1])
-                #im_temp = Image.open(imgs[ind])
-                #im_temp.save(img_dest)
 
-            if not test_ims:
-                if symflag:
-                    os.symlink(imgs[ind], img_dest)
-                else:
-                    shutil.copy(imgs[ind], img_dest)
-
+            if symflag:
+                os.symlink(imgs[ind], img_dest)
             else:
-                flg = test_img(imgs[ind])
-                if flg:
-                    shutil.copy(imgs[ind], img_dest)
-                else:
-                    pass
+                shutil.copy(imgs[ind], img_dest)
