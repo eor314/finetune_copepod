@@ -25,7 +25,6 @@ if __name__=="__main__":
 
     parser.add_argument('data_dir', metavar='data_dir', help='path to labelset')
     parser.add_argument('output_dir', metavar='output_dir', help='path to the output train/val set')
-    parser.add_argument('--image_subdir', default='', help='name of image subdir within data_dir')
     parser.add_argument('--train_name', default='train', help='name of training dir to create')
     parser.add_argument('--val_name', default='val', help='name of validation dir to create')
     parser.add_argument('--train_pct', default=0, help='fraction of training vs validation from total')
@@ -37,8 +36,8 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    data_path = args.data_dir
-    out_dir = args.output_dir
+    img_path = args.data_dir
+    dataset_parent = args.output_dir
     img_subdir = args.image_subdir
     train_name = args.train_name
     val_name = args.val_name
@@ -50,12 +49,6 @@ if __name__=="__main__":
     test_ims = args.test_ims
     symflag = args.symlink
 
-    img_path = os.path.join(data_path, img_subdir)
-
-    list_image_counts(img_path)
-    print(os.path.basename(data_path))
-    dataset_parent = os.path.join(out_dir, os.path.basename(data_path))
-    #print(dataset_parent)
     dataset_path = os.path.join(dataset_parent, datetime.utcnow().isoformat()[:-7].replace(':','-'))
 
     if not os.path.exists(dataset_parent):
