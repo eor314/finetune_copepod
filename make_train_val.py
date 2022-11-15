@@ -8,31 +8,6 @@ import argparse
 from PIL import Image
 from datetime import datetime
 
-def str2bool(v):
-    """
-    returns a boolean from argparse input
-    """
-
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected')
-
-
-def test_img(xx):
-    """
-    Tests if an image is corrupted
-    """
-    try:
-        tmp = Image.open(xx)
-        return True
-    except OSError:
-        return False
-
 
 def list_image_counts(data_path):
 
@@ -57,9 +32,8 @@ if __name__=="__main__":
     parser.add_argument('--train_size', default=800, help='Number of images in train set per class')
     parser.add_argument('--val_size', default=200, help='Number of images in val set per class')
     parser.add_argument('--min_images', default=100, help='Smallest number of images per class to use')
-    parser.add_argument('--duplicate', type=str2bool, default=True, help='When True, images are duplicated as needed')
-    parser.add_argument('--test_ims', type=str2bool, default=False, help='when True, open each image to ensure no error')
-    parser.add_argument('--symlink', type=str2bool, default=True, help='When True, symlink images instead of copying to new dir')
+    parser.add_argument('--duplicate', action='store_false', help='When True, images are duplicated as needed')
+    parser.add_argument('--symlink', action='store_true', default=True, help='When True, symlink images instead of copying to new dir')
 
     args = parser.parse_args()
 
