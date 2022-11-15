@@ -181,9 +181,9 @@ if __name__=="__main__":
         model_conv = models.squeezenet1_0(pretrained=True)
         # change the last Conv2D layer in case of squeezenet. there is no fc layer in the end.
         num_ftrs = 512
-        model_conv.classifier._modules["1"] = nn.Conv2d(512, len(classes), kernel_size=(1, 1))
+        model_conv.classifier._modules["1"] = nn.Conv2d(512, len(class_names), kernel_size=(1, 1))
         # because in forward pass, there is a view function call which depends on the final output class size.
-        model_conv.num_classes = len(classes)
+        model_conv.num_classes = len(class_names)
 
     model_conv = model_conv.to(device)
 
