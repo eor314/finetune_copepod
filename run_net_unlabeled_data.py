@@ -52,7 +52,7 @@ class ImageFolderWithPaths(datasets.ImageFolder):
 if __name__ == '__main__':
 
     # define parser
-    parser = argparse.ArgumentParser(description='Make a train and val set from labels')
+    parser = argparse.ArgumentParser(description='Run a trained model on new unseen data')
 
     parser.add_argument(
         'data_dir', 
