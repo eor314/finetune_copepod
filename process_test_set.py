@@ -47,21 +47,6 @@ class ImageFolderWithPaths(datasets.ImageFolder):
         return tuple_with_path
 
 
-def str2bool(v):
-    """
-    returns a boolean from argparse input
-    """
-
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected')
-
-
 if __name__ == "__main__":
 
     # define parser
@@ -70,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument('data_dir', metavar='data_dir', help='path to unlabeled data')
     parser.add_argument('output_dir', metavar='output_dir', help='path to the output directory')
     parser.add_argument('classifier', metavar='classifier', help='path to trained weights')
-    parser.add_argument('--save_mosaic', type=str2bool, default=False, help='name of image subdir within data_dir')
+    parser.add_argument('--save_mosaic', action='store_true', help='flag to save mosaic of output ROIs')
     parser.add_argument('--num_per_class', default=20, help='number to select for mosaic')
 
     args = parser.parse_args()
