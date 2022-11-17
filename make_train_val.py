@@ -38,7 +38,6 @@ if __name__=="__main__":
 
     img_path = args.data_dir
     dataset_parent = args.output_dir
-    img_subdir = args.image_subdir
     train_name = args.train_name
     val_name = args.val_name
     train_pct = float(args.train_pct)
