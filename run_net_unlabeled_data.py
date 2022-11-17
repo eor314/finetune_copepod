@@ -27,7 +27,7 @@ import glob
 import sys
 import urllib
 import time
-from shutil import copy, rmtree
+from shutil import copy, rmtree, copyfile
 import argparse
 from tile_images import tile_images, get_rand_ims
 from cv2 import imwrite
@@ -196,6 +196,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(temp_parent):
         os.mkdir(temp_parent)
+        print(temp_parent)
 
     for dir_in in dirs_to_process:
 
@@ -221,7 +222,8 @@ if __name__ == '__main__':
 
             # symlink the images into the directory
             for img in imgs_in:
-                os.symlink(img, os.path.join(temp_dir, os.path.basename(img)))
+                #os.symlink(img, os.path.join(temp_dir, os.path.basename(img)))
+                copyfile(img, os.path.join(temp_dir, os.path.basename(img)))
 
             # make the output directory
             out_subdir = os.path.join(output_parent, os.path.basename(dir_in))
@@ -266,18 +268,23 @@ if __name__ == '__main__':
                     dir_name = os.path.join(out_subdir, kk)
 
                     if not os.path.exists(dir_name):
-                        os.makedirs(dir_name)
+                        os.mkdir(dir_name)
 
                     for line in temp_out[kk]:
 
                         try:
-                            # find the absolute path of the original image
+                            #find the absolute path of the original image
                             abs_img = [item for item in imgs_in if os.path.basename(item) == line][0]
 
                             # copy image to dir
-                            copy(abs_img, dir_name)
+                            copy(abs_img, os.path.join(dir_name, line))
+
                         except FileNotFoundError:
-                            print('Can not find: ', abs_img)
+                            print('problem copying ', abs_img, ' to \n', dir_name)
+
+                            if not os.path.exists:
+                                print(dir_name, ' does not exist?')
+                                sys.exit()
                             continue
 
             # make the mosaics if needed
