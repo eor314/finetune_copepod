@@ -45,7 +45,6 @@ if __name__=="__main__":
     val_size = int(args.val_size)
     min_imgs = int(args.min_images)
     duplicate = args.duplicate
-    test_ims = args.test_ims
     symflag = args.symlink
 
     dataset_path = os.path.join(dataset_parent, datetime.utcnow().isoformat()[:-7].replace(':','-'))
