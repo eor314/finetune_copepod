@@ -20,7 +20,7 @@ from torch.optim import lr_scheduler
 import numpy as np
 import torchvision
 from torchvision import datasets, models, transforms
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import time
 import os
 import copy
@@ -118,12 +118,13 @@ def train_model(model, criterion, optimizer, scheduler,
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser(description='Finetune a convnet')
-
     parser.add_argument('data_dir',metavar='data_dir',help='path to train and val data')
-
-    parser.add_argument('--model',default='resnet34',choices=['resnet18','resnet34','squeezenet'],
-        help='The type of model to finetune')
-
+    parser.add_argument(
+        '--model',
+        default='resnet18',
+        choices=['resnet18','resnet34','squeezenet'],
+        help='The type of model to finetune'
+    )
     parser.add_argument('--epochs',default=24,type=int,help='The number of training epochs')
 
     args = parser.parse_args()
@@ -165,7 +166,7 @@ if __name__=="__main__":
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model_type = 'resnet18'
+    model_type = args.model
 
     if model_type == 'resnet34':
         model_conv = models.resnet34(pretrained=True)
@@ -180,9 +181,9 @@ if __name__=="__main__":
         model_conv = models.squeezenet1_0(pretrained=True)
         # change the last Conv2D layer in case of squeezenet. there is no fc layer in the end.
         num_ftrs = 512
-        model_conv.classifier._modules["1"] = nn.Conv2d(512, len(classes), kernel_size=(1, 1))
+        model_conv.classifier._modules["1"] = nn.Conv2d(512, len(class_names), kernel_size=(1, 1))
         # because in forward pass, there is a view function call which depends on the final output class size.
-        model_conv.num_classes = len(classes)
+        model_conv.num_classes = len(class_names)
 
     model_conv = model_conv.to(device)
 

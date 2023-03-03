@@ -1,0 +1,17 @@
+# stuff
+.ipynb_checkpoints/
+datasets/
+*.csv
+
+# Caches
+*__pycache__/
+.pytest_cache/
+*.pyc
+
+# Build
+build/
+
+# MISC
+.vscode/settings.json
+.idea
+.DS_Store
