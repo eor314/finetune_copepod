@@ -6,32 +6,7 @@ import shutil
 import numpy as np
 import argparse
 from PIL import Image
-
-
-def str2bool(v):
-    """
-    returns a boolean from argparse input
-    """
-
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected')
-
-
-def test_img(xx):
-    """
-    Tests if an image is corrupted
-    """
-    try:
-        tmp = Image.open(xx)
-        return True
-    except OSError:
-        return False
+from datetime import datetime
 
 
 def list_image_counts(data_path):
@@ -50,22 +25,19 @@ if __name__=="__main__":
 
     parser.add_argument('data_dir', metavar='data_dir', help='path to labelset')
     parser.add_argument('output_dir', metavar='output_dir', help='path to the output train/val set')
-    parser.add_argument('--image_subdir', default='', help='name of image subdir within data_dir')
     parser.add_argument('--train_name', default='train', help='name of training dir to create')
     parser.add_argument('--val_name', default='val', help='name of validation dir to create')
     parser.add_argument('--train_pct', default=0, help='fraction of training vs validation from total')
     parser.add_argument('--train_size', default=800, help='Number of images in train set per class')
     parser.add_argument('--val_size', default=200, help='Number of images in val set per class')
     parser.add_argument('--min_images', default=100, help='Smallest number of images per class to use')
-    parser.add_argument('--duplicate', type=str2bool, default=True, help='When True, images are duplicated as needed')
-    parser.add_argument('--test_ims', type=str2bool, default=False, help='when True, open each image to ensure no error')
-    parser.add_argument('--symlink', type=str2bool, default=True, help='When True, symlink images instead of copying to new dir')
-    
+    parser.add_argument('--duplicate', action='store_false', help='When True, images are duplicated as needed')
+    parser.add_argument('--symlink', action='store_true', default=True, help='When True, symlink images instead of copying to new dir')
+
     args = parser.parse_args()
 
-    data_path = args.data_dir
-    dataset_path = args.output_dir
-    img_subdir = args.image_subdir
+    img_path = args.data_dir
+    dataset_parent = args.output_dir
     train_name = args.train_name
     val_name = args.val_name
     train_pct = float(args.train_pct)
@@ -73,11 +45,12 @@ if __name__=="__main__":
     val_size = int(args.val_size)
     min_imgs = int(args.min_images)
     duplicate = args.duplicate
-    test_ims = args.test_ims
     symflag = args.symlink
-    img_path = os.path.join(data_path, img_subdir)
 
-    list_image_counts(img_path)
+    dataset_path = os.path.join(dataset_parent, datetime.utcnow().isoformat()[:-7].replace(':','-'))
+
+    if not os.path.exists(dataset_parent):
+        os.mkdir(dataset_parent)
 
     if not os.path.exists(dataset_path):
         os.makedirs(dataset_path)
@@ -94,7 +67,6 @@ if __name__=="__main__":
 
         if train_pct != 0:
 
-            # make inds
             all_inds = random.sample(range(0,len(imgs)),len(imgs))
             train_inds = all_inds[0:int(train_pct*len(imgs))]
             val_inds = all_inds[int(train_pct*len(imgs)):]
@@ -140,21 +112,11 @@ if __name__=="__main__":
                 img_dest = os.path.join(new_img_dir,
                                         os.path.basename(imgs[ind])[:-4] + '_index_' +
                                         str(i).zfill(4) + os.path.splitext(imgs[ind])[1])
-                #im_temp = Image.open(imgs[ind])
-                #im_temp.save(img_dest)
 
-            if not test_ims:
-                if symflag:
-                    os.symlink(imgs[ind], img_dest)
-                else:
-                    shutil.copy(imgs[ind], img_dest)
-
+            if symflag:
+                os.symlink(imgs[ind], img_dest)
             else:
-                flg = test_img(imgs[ind])
-                if flg:
-                    shutil.copy(imgs[ind], img_dest)
-                else:
-                    pass
+                shutil.copy(imgs[ind], img_dest)
 
         new_img_dir = os.path.join(dataset_path, 'val', os.path.basename(img_dir))
 
@@ -169,18 +131,8 @@ if __name__=="__main__":
                 img_dest = os.path.join(new_img_dir,
                                         os.path.basename(imgs[ind])[:-4] + '_index_' +
                                         str(i).zfill(4) + os.path.splitext(imgs[ind])[1])
-                #im_temp = Image.open(imgs[ind])
-                #im_temp.save(img_dest)
 
-            if not test_ims:
-                if symflag:
-                    os.symlink(imgs[ind], img_dest)
-                else:
-                    shutil.copy(imgs[ind], img_dest)
-
+            if symflag:
+                os.symlink(imgs[ind], img_dest)
             else:
-                flg = test_img(imgs[ind])
-                if flg:
-                    shutil.copy(imgs[ind], img_dest)
-                else:
-                    pass
+                shutil.copy(imgs[ind], img_dest)

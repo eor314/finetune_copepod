@@ -142,7 +142,7 @@ def download_spc_url(url_string, out_path):
 
                 # make the out_path
                 imgout = out_base.format(os.path.basename(img_url))
-    """
+
                 # download the image. Skip if the image is not found
                 try:
                     img_req = http.request('GET', inpath)

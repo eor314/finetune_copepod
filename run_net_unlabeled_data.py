@@ -27,7 +27,7 @@ import glob
 import sys
 import urllib
 import time
-from shutil import copy, rmtree
+from shutil import copy, rmtree, copyfile
 import argparse
 from tile_images import tile_images, get_rand_ims
 from cv2 import imwrite
@@ -49,50 +49,80 @@ class ImageFolderWithPaths(datasets.ImageFolder):
         return tuple_with_path
 
 
-def str2bool(v):
-    """
-    returns a boolean from argparse input
-    """
-
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected')
-
-
 if __name__ == '__main__':
 
     # define parser
-    parser = argparse.ArgumentParser(description='Make a train and val set from labels')
+    parser = argparse.ArgumentParser(description='Run a trained model on new unseen data')
 
-    parser.add_argument('data_dir', metavar='data_dir', help='path to unlabeled data')
-    parser.add_argument('classifier', metavar='classifier', help='path to trained weights')
-    parser.add_argument('--save_mosaic', metavar='save_mosaic', type=str2bool,
-                        default=False, help='name of image subdir within data_dir')
-    parser.add_argument('--num_per_class', metavar='num_per_class', default=20, help='number to select for mosaic')
-    parser.add_argument('--buff', metavar='buff', default=0, help='number of pixels to add as buffer between classes in mosaic')
+    parser.add_argument(
+        'data_dir', 
+        metavar='data_dir', 
+        help='Path to unlabeled data. If directory, loops over images or subdirectory.' 
+                'If text file, reads absolute paths for images'
+    )
+    parser.add_argument(
+        'classifier', 
+        metavar='classifier', 
+        help='path to trained weights'
+    )
+    parser.add_argument(
+        '--output_parent', 
+        metavar='output_parent', 
+        help='absolute path to directory to save outputs'
+    )
+    parser.add_argument(
+        '--save_mosaic', 
+        action='store_true', 
+        help='name of image subdir within data_dir'
+    )
+    parser.add_argument(
+        '--num_per_class', 
+        metavar='num_per_class', 
+        default=20, 
+        help='number to select for mosaic'
+    )
+    parser.add_argument(
+        '--buff', 
+        metavar='buff', 
+        default=0, 
+        help='number of pixels to add as buffer between classes in mosaic'
+    )
+    parser.add_argument(
+        '--save_all_out', 
+        action='store_true', 
+        help='whether to copy images to output directory'
+    )
 
     args = parser.parse_args()
     data_dir = args.data_dir
     classifier = args.classifier
+    classifier = classifier.strip('\u202a')
     save_mosaic = args.save_mosaic
     num_per_class = int(args.num_per_class)
     buff = int(args.buff)
+    save_all_out = args.save_all_out
 
-    print(num_per_class)
+    if save_all_out:
+        print('Saving all output images')
+
+    #print(num_per_class)
 
     # derive the output validation directory from the classifier name
     data_parent = os.path.split(classifier)[0]
-    output_parent = os.path.join(data_parent, 'outputs', os.path.basename(classifier).split('.')[0] +
+
+    if args.output_parent:
+        # if directory specified
+        output_parent = os.path.join(args.output_parent, os.path.basename(classifier).split('.')[0] +
+                                 '_' + str(int(time.time())))
+    else:
+        # dervice from classifier directory
+        output_parent = os.path.join(data_parent, 'outputs', os.path.basename(classifier).split('.')[0] +
                                  '_' + str(int(time.time())))
 
     val_dir = os.path.join(data_parent, 'val')
-    print(output_parent)
-    os.mkdir(output_parent)
+
+    if not os.path.exists(output_parent):
+        os.mkdir(output_parent)
 
     class_names = []
     for name in sorted(glob.glob(os.path.join(val_dir, '*'))):
@@ -154,17 +184,29 @@ if __name__ == '__main__':
 
     ### iterate over directories ###
     dirs_to_process = glob.glob(os.path.join(data_dir, '*'))
+    dirs_to_process = [item for item in dirs_to_process if os.path.isdir(item) if 'outputs' not in item]  # check that outputs in not in there
     dirs_to_process.sort()
+
+    # if dirs_to_process is empty, assume all the images live in the given data_dir
+    if len(dirs_to_process) == 0:
+        dirs_to_process.append(data_dir)
 
     # make the temp directory for symlinking
     temp_parent = os.path.join(output_parent, 'temp')
 
     if not os.path.exists(temp_parent):
         os.mkdir(temp_parent)
+        print(temp_parent)
 
     for dir_in in dirs_to_process:
 
-        imgs_in = glob.glob(os.path.join(dir_in, '*'))
+        if os.path.isdir(dir_in):
+            imgs_in = glob.glob(os.path.join(dir_in, '*'))
+        else:
+            with open(dir_in, 'r') as ff:
+                imgs_in = list(ff)
+                imgs_in = [line.strip() for line in imgs_in]
+                ff.close()
 
         temp_out = {k: [] for k in class_names}
 
@@ -180,7 +222,8 @@ if __name__ == '__main__':
 
             # symlink the images into the directory
             for img in imgs_in:
-                os.symlink(img, os.path.join(temp_dir, os.path.basename(img)))
+                #os.symlink(img, os.path.join(temp_dir, os.path.basename(img)))
+                copyfile(img, os.path.join(temp_dir, os.path.basename(img)))
 
             # make the output directory
             out_subdir = os.path.join(output_parent, os.path.basename(dir_in))
@@ -217,6 +260,32 @@ if __name__ == '__main__':
                     for line in temp_out[kk]:
                         ff.write(line + '\n')
                     ff.close()
+
+            # save copies of the images to output directory
+            if save_all_out:
+                for kk in temp_out.keys():
+
+                    dir_name = os.path.join(out_subdir, kk)
+
+                    if not os.path.exists(dir_name):
+                        os.mkdir(dir_name)
+
+                    for line in temp_out[kk]:
+
+                        try:
+                            #find the absolute path of the original image
+                            abs_img = [item for item in imgs_in if os.path.basename(item) == line][0]
+
+                            # copy image to dir
+                            copy(abs_img, os.path.join(dir_name, line))
+
+                        except FileNotFoundError:
+                            print('problem copying ', abs_img, ' to \n', dir_name)
+
+                            if not os.path.exists:
+                                print(dir_name, ' does not exist?')
+                                sys.exit()
+                            continue
 
             # make the mosaics if needed
             if save_mosaic:
