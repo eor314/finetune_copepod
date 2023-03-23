@@ -30,7 +30,7 @@ import time
 from shutil import copy, rmtree, copyfile
 import argparse
 from tile_images import tile_images, get_rand_ims
-from cv2 import imwrite
+#from cv2 import imwrite
 
 
 class ImageFolderWithPaths(datasets.ImageFolder):
@@ -93,6 +93,12 @@ if __name__ == '__main__':
         help='whether to copy images to output directory'
     )
 
+    parser.add_argument(
+        '--grayscale', 
+        action='store_true', 
+        help='whether to convert images to grayscale in transform'
+    )
+
     args = parser.parse_args()
     data_dir = args.data_dir
     classifier = args.classifier
@@ -101,6 +107,7 @@ if __name__ == '__main__':
     num_per_class = int(args.num_per_class)
     buff = int(args.buff)
     save_all_out = args.save_all_out
+    grayscale = args.grayscale
 
     if save_all_out:
         print('Saving all output images')
@@ -136,7 +143,26 @@ if __name__ == '__main__':
 
     # Data augmentation and normalization for training
     # Just normalization for    validation
-    data_transforms = {
+    if grayscale:
+        data_transforms = {
+            'train': transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.RandomAffine(degrees=0, scale=(0.5, 2), shear=(-5, 5)),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ]),
+            'val': transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ]),
+        }
+    else:
+        data_transforms = {
         'train': transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.RandomHorizontalFlip(),
@@ -151,7 +177,6 @@ if __name__ == '__main__':
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ]),
     }
-
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # load the saved model
@@ -288,34 +313,34 @@ if __name__ == '__main__':
                             continue
 
             # make the mosaics if needed
-            if save_mosaic:
-                flag = 0
-                img_out = np.zeros((128*10, 128*2*len(class_names), 3))
-                img_out = img_out.astype(np.uint8)
+            # if save_mosaic:
+            #     flag = 0
+            #     img_out = np.zeros((128*10, 128*2*len(class_names), 3))
+            #     img_out = img_out.astype(np.uint8)
 
-                out_list = []
-                for kk in temp_out.keys():
-                    print(kk)
-                    temp_list = temp_out[kk]
-                    np.random.shuffle(temp_list)
-                    temp_list = [os.path.join(dir_in, line) for line in temp_list]
-                    im_temp = temp_list[0:num_per_class]
-                    temp_tile = tile_images(im_temp, [10, 2])
-                    img_out[:, 128 * 2 * flag:128 * 2 * flag + 128 * 2, :] = temp_tile
+            #     out_list = []
+            #     for kk in temp_out.keys():
+            #         print(kk)
+            #         temp_list = temp_out[kk]
+            #         np.random.shuffle(temp_list)
+            #         temp_list = [os.path.join(dir_in, line) for line in temp_list]
+            #         im_temp = temp_list[0:num_per_class]
+            #         temp_tile = tile_images(im_temp, [10, 2])
+            #         img_out[:, 128 * 2 * flag:128 * 2 * flag + 128 * 2, :] = temp_tile
 
-                    if buff > 0:
-                        img_out[:, ((128*2*flag)+128*2)-int(buff/2):((128*2*flag)+128*2)-int(buff/2), :] = 255
+            #         if buff > 0:
+            #             img_out[:, ((128*2*flag)+128*2)-int(buff/2):((128*2*flag)+128*2)-int(buff/2), :] = 255
 
-                    flag += 1
+            #         flag += 1
 
-                    out_list.extend(im_temp)
+            #         out_list.extend(im_temp)
 
-                out_mosaic = os.path.join(out_subdir, 'mosaic.png')
-                imwrite(out_mosaic, img_out)
-                with open(os.path.join(out_subdir, 'mosaic_imgs.txt'), 'w') as ff:
-                    for line in out_list:
-                        ff.write(line + '\n')
-                    ff.close()
+            #     out_mosaic = os.path.join(out_subdir, 'mosaic.png')
+            #     imwrite(out_mosaic, img_out)
+            #     with open(os.path.join(out_subdir, 'mosaic_imgs.txt'), 'w') as ff:
+            #         for line in out_list:
+            #             ff.write(line + '\n')
+            #         ff.close()
 
             # remove the temporary directory
             rmtree(temp_dir)
